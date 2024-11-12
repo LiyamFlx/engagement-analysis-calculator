@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engagement Analysis Calculator</title>
     <style>
-        /* Reset and Body Styling */
+        /* CSS Styles */
         body, h2, p, button {
             margin: 0;
             padding: 0;
@@ -17,15 +17,15 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f7f7f7;
+            background-color: #f4f4f9;
         }
 
         #app {
             width: 350px;
             padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             background: #ffffff;
-            border-radius: 8px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -38,204 +38,175 @@
         }
 
         h2 {
-            font-size: 1.5em;
+            font-size: 1.6em;
             margin-bottom: 10px;
         }
 
-        p {
-            margin-bottom: 20px;
-        }
-
-        input[type="file"] {
-            display: block;
-            margin: 10px auto 20px auto;
-        }
-
-        .buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
+        .note {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
         }
 
         button {
-            padding: 8px 16px;
+            padding: 10px 20px;
+            margin: 15px 5px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        button.primary {
+            border-radius: 5px;
             background-color: #4CAF50;
             color: white;
-        }
-
-        button.primary:hover {
-            background-color: #45a049;
+            cursor: pointer;
         }
 
         button:hover {
-            background-color: #e0e0e0;
-        }
-
-        /* Progress bar styling for Calculate Engagement */
-        .progress-container {
-            width: 100%;
-            background-color: #f1f1f1;
-            border-radius: 5px;
-            margin-bottom: 15px;
+            background-color: #45a049;
         }
 
         .progress-bar {
-            height: 10px;
-            background-color: #4CAF50;
+            width: 100%;
+            background-color: #ddd;
             border-radius: 5px;
-            width: 0%;
-            transition: width 0.4s;
+            margin-top: 10px;
         }
 
-        /* Results placeholder */
-        #resultPlaceholder {
-            font-size: 1.2em;
-            color: #555;
-            margin-top: 20px;
+        .progress {
+            height: 10px;
+            width: 0%;
+            background-color: #4CAF50;
+            border-radius: 5px;
         }
     </style>
-    <!-- Include Chart.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="app">
-        <!-- Screen 1: Start Screen -->
-        <div class="screen" id="screen1">
+        <!-- Start Screen -->
+        <div class="screen active" id="startScreen">
             <h2>Welcome to the Engagement Analysis</h2>
             <p>Analyze your audience engagement with precision.</p>
-            <button class="primary" onclick="showScreen(2)">Start Analysis</button>
+            <button onclick="showScreen('uploadScreen')">Start Analysis</button>
         </div>
 
-        <!-- Screen 2: File Upload Screen -->
-        <div class="screen" id="screen2">
-            <h2>Upload File</h2>
-            <input type="file" id="fileInput" accept=".mp3,.mp4">
-            <div class="buttons">
-                <button onclick="showScreen(1)">Back</button>
-                <button class="primary" onclick="showScreen(3)">Next</button>
-            </div>
+        <!-- Upload File Screen -->
+        <div class="screen" id="uploadScreen">
+            <h2>Upload Your Audio File</h2>
+            <input type="file" id="fileInput" accept=".mp3,.wav">
+            <p class="note">Supported formats: MP3, WAV</p>
+            <button onclick="showScreen('startScreen')">Back</button>
+            <button onclick="processFile()">Calculate Engagement</button>
         </div>
 
-        <!-- Screen 3: Calculate Engagement Screen -->
-        <div class="screen" id="screen3">
-            <h2>Calculate Engagement</h2>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+        <!-- Real-Time Analysis Screen -->
+        <div class="screen" id="analysisScreen">
+            <h2>Analyzing Engagement</h2>
+            <div id="progressContainer">
+                <p>Progress: <span id="progressText">0%</span></p>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
             </div>
-            <button class="primary" onclick="startAnalysis()">Start Analysis</button>
-            <p id="resultPlaceholder" style="display: none;">Calculating...</p>
-            <div class="buttons">
-                <button onclick="showScreen(2)">Back</button>
-                <button onclick="showScreen(4)">Next</button>
-            </div>
+            <canvas id="engagementChart" width="400" height="200"></canvas>
+            <button onclick="showScreen('uploadScreen')">Back</button>
         </div>
 
-        <!-- Screen 4: Secure Results Screen -->
-        <div class="screen" id="screen4">
+        <!-- Results Screen -->
+        <div class="screen" id="resultsScreen">
             <h2>Analysis Results</h2>
-            <p id="finalResult">Engagement Score: -</p>
-            <div class="buttons">
-                <button onclick="showScreen(3)">Back</button>
-                <button class="primary" onclick="showScreen(5)">View Visualization</button>
-            </div>
-        </div>
-
-        <!-- Screen 5: Visualization Screen -->
-        <div class="screen" id="screen5">
-            <h2>Engagement Visualization</h2>
-            <div id="chartContainer">
-                <canvas id="engagementChart"></canvas>
-            </div>
-            <div class="buttons">
-                <button onclick="showScreen(4)">Back</button>
-                <button class="primary" onclick="showScreen(1)">New Analysis</button>
-            </div>
+            <p>Your average engagement score:</p>
+            <h3 id="averageScore">0.00</h3>
+            <button onclick="showScreen('startScreen')">New Analysis</button>
         </div>
     </div>
 
+    <!-- Include Chart.js for the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        function showScreen(screenNumber) {
+        // JavaScript to handle screen transitions and engagement analysis
+
+        function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-            document.getElementById(`screen${screenNumber}`).classList.add('active');
+            document.getElementById(screenId).classList.add('active');
         }
-        showScreen(1);
 
+        // Placeholder for file processing
+        function processFile() {
+            const file = document.getElementById("fileInput").files[0];
+            if (!file) {
+                alert("Please select a file to analyze.");
+                return;
+            }
+            showScreen("analysisScreen");
+            startAnalysis();
+        }
+
+        // Dummy data for engagement calculation
         function startAnalysis() {
-            const progressBar = document.getElementById('progressBar');
-            const resultPlaceholder = document.getElementById('resultPlaceholder');
-            const finalResult = document.getElementById('finalResult');
-
-            // Reset UI elements
-            progressBar.style.width = '0%';
-            resultPlaceholder.style.display = 'block';
-            resultPlaceholder.innerText = 'Calculating...';
+            const progressBar = document.getElementById("progressBar");
+            const progressText = document.getElementById("progressText");
+            const scores = [];
+            const maxScore = 10;
 
             let progress = 0;
-            const analysisInterval = setInterval(() => {
-                progress += 20;
-                progressBar.style.width = `${progress}%`;
-                
+
+            // Simulating real-time analysis
+            const interval = setInterval(() => {
                 if (progress >= 100) {
-                    clearInterval(analysisInterval);
-                    resultPlaceholder.style.display = 'none';
-                    finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
+                    clearInterval(interval);
+                    showResults(scores);
+                    return;
                 }
-            }, 500); // Simulate analysis progress every 0.5 seconds
+
+                // Simulate engagement score calculation
+                const score = (Math.random() * maxScore).toFixed(2);
+                scores.push(parseFloat(score));
+
+                progress += 10; // Update progress
+                progressBar.style.width = progress + "%";
+                progressText.textContent = progress + "%";
+
+                updateChart(scores); // Update chart with new score
+
+            }, 500); // Simulate every half-second
         }
 
-        function generateRandomScore() {
-            return (Math.random() * 10).toFixed(2); 
-        }
+        // Function to update the engagement chart
+        function updateChart(scores) {
+            const ctx = document.getElementById("engagementChart").getContext("2d");
 
-        document.getElementById('fileInput').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                console.log(`File selected: ${file.name}`);
+            if (window.engagementChart) {
+                window.engagementChart.data.labels.push(scores.length);
+                window.engagementChart.data.datasets[0].data.push(scores[scores.length - 1]);
+                window.engagementChart.update();
             } else {
-                console.log('No file selected');
-            }
-        });
-
-        function renderChart() {
-            const ctx = document.getElementById('engagementChart').getContext('2d');
-            const data = {
-                labels: Array.from({length: 10}, (_, i) => `Chunk ${i + 1}`),
-                datasets: [
-                    {
-                        label: 'Engagement Score',
-                        data: Array.from({length: 10}, () => generateRandomScore()),
-                        fill: false,
-                        borderColor: 'blue',
-                        tension: 0.1
-                    }
-                ]
-            };
-            const config = {
-                type: 'line',
-                data: data,
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10
+                window.engagementChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: scores.length }, (_, i) => i + 1),
+                        datasets: [{
+                            label: 'Engagement Score',
+                            data: scores,
+                            borderColor: '#4CAF50',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { display: true, title: { display: true, text: 'Time' } },
+                            y: { display: true, title: { display: true, text: 'Score' }, min: 0, max: 10 }
                         }
                     }
-                }
-            };
-            new Chart(ctx, config);
+                });
+            }
         }
 
-        document.getElementById('screen4').querySelector('button[onclick="showScreen(5)"]').addEventListener('click', renderChart);
+        // Show final results
+        function showResults(scores) {
+            const averageScore = (scores.reduce((a, b) => a + b) / scores.length).toFixed(2);
+            document.getElementById("averageScore").textContent = averageScore;
+            showScreen("resultsScreen");
+        }
     </script>
 </body>
 </html>
