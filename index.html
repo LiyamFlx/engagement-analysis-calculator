@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engagement Analysis Calculator</title>
+    <style>
+        /* Reset some default styles */
+        body, h2, p, button {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+
+        #app {
+            width: 300px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 10px auto 20px auto;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Screen 1: Start Screen -->
+        <div class="screen" id="screen1">
+            <h2>Welcome to the Engagement Analysis</h2>
+            <p>Analyze your audience engagement with precision.</p>
+            <button onclick="showScreen(2)">Start Analysis</button>
+        </div>
+
+        <!-- Screen 2: File Upload Screen -->
+        <div class="screen" id="screen2">
+            <h2>Upload File</h2>
+            <input type="file" id="fileInput" accept=".mp3,.mp4">
+            <div class="buttons">
+                <button onclick="showScreen(1)">Back</button>
+                <button onclick="showScreen(3)">Next</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Calculate Engagement Screen -->
+        <div class="screen" id="screen3">
+            <h2>Calculate Engagement</h2>
+            <button onclick="startAnalysis()">Start Analysis</button>
+            <p id="resultPlaceholder" style="display: none;">Calculating...</p>
+            <div class="buttons">
+                <button onclick="showScreen(2)">Back</button>
+                <button onclick="showScreen(4)">Next</button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Secure Results Screen -->
+        <div class="screen" id="screen4">
+            <h2>Analysis Results</h2>
+            <p id="finalResult">Engagement Score: -</p>
+            <button onclick="showScreen(3)">Back</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to show a specific screen by ID
+        function showScreen(screenNumber) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show the requested screen
+            document.getElementById(`screen${screenNumber}`).classList.add('active');
+        }
+
+        // Initialize on the first screen
+        showScreen(1);
+
+        // Function to simulate engagement analysis
+        function startAnalysis() {
+            const resultPlaceholder = document.getElementById('resultPlaceholder');
+            const finalResult = document.getElementById('finalResult');
+
+            // Display "Calculating..." placeholder
+            resultPlaceholder.style.display = 'block';
+            resultPlaceholder.innerText = 'Calculating...';
+
+            // Simulate a 2-second delay for the analysis
+            setTimeout(() => {
+                // Hide the calculating message and display the result
+                resultPlaceholder.style.display = 'none';
+                finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
+            }, 2000);
+        }
+
+        // Function to generate a random engagement score for demonstration purposes
+        function generateRandomScore() {
+            return (Math.random() * 10).toFixed(2);  // Generates a score between 0 and 10
+        }
+
+        // Basic file validation on screen 2 (to confirm a file was selected)
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const fileName = file.name;
+                console.log(`File selected: ${fileName}`);
+            } else {
+                console.log('No file selected');
+            }
+        });
+    </script>
+</body>
+</html>
