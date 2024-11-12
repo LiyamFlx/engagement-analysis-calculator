@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engagement Analysis Calculator</title>
     <style>
-        /* Reset some default styles */
+        /* Reset and Body Styling */
         body, h2, p, button {
             margin: 0;
             padding: 0;
@@ -21,7 +21,7 @@
         }
 
         #app {
-            width: 300px;
+            width: 350px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             background: #ffffff;
@@ -54,6 +54,7 @@
         .buttons {
             display: flex;
             justify-content: space-between;
+            margin-top: 20px;
         }
 
         button {
@@ -61,12 +62,47 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1em;
+        }
+
+        button.primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        button.primary:hover {
+            background-color: #45a049;
         }
 
         button:hover {
             background-color: #e0e0e0;
         }
+
+        /* Progress bar styling for Calculate Engagement */
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.4s;
+        }
+
+        /* Results placeholder */
+        #resultPlaceholder {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 20px;
+        }
     </style>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="app">
@@ -74,7 +110,7 @@
         <div class="screen" id="screen1">
             <h2>Welcome to the Engagement Analysis</h2>
             <p>Analyze your audience engagement with precision.</p>
-            <button onclick="showScreen(2)">Start Analysis</button>
+            <button class="primary" onclick="showScreen(2)">Start Analysis</button>
         </div>
 
         <!-- Screen 2: File Upload Screen -->
@@ -83,14 +119,17 @@
             <input type="file" id="fileInput" accept=".mp3,.mp4">
             <div class="buttons">
                 <button onclick="showScreen(1)">Back</button>
-                <button onclick="showScreen(3)">Next</button>
+                <button class="primary" onclick="showScreen(3)">Next</button>
             </div>
         </div>
 
         <!-- Screen 3: Calculate Engagement Screen -->
         <div class="screen" id="screen3">
             <h2>Calculate Engagement</h2>
-            <button onclick="startAnalysis()">Start Analysis</button>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <button class="primary" onclick="startAnalysis()">Start Analysis</button>
             <p id="resultPlaceholder" style="display: none;">Calculating...</p>
             <div class="buttons">
                 <button onclick="showScreen(2)">Back</button>
@@ -102,57 +141,101 @@
         <div class="screen" id="screen4">
             <h2>Analysis Results</h2>
             <p id="finalResult">Engagement Score: -</p>
-            <button onclick="showScreen(3)">Back</button>
+            <div class="buttons">
+                <button onclick="showScreen(3)">Back</button>
+                <button class="primary" onclick="showScreen(5)">View Visualization</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Visualization Screen -->
+        <div class="screen" id="screen5">
+            <h2>Engagement Visualization</h2>
+            <div id="chartContainer">
+                <canvas id="engagementChart"></canvas>
+            </div>
+            <div class="buttons">
+                <button onclick="showScreen(4)">Back</button>
+                <button class="primary" onclick="showScreen(1)">New Analysis</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Function to show a specific screen by ID
         function showScreen(screenNumber) {
-            // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-
-            // Show the requested screen
             document.getElementById(`screen${screenNumber}`).classList.add('active');
         }
-
-        // Initialize on the first screen
         showScreen(1);
 
-        // Function to simulate engagement analysis
         function startAnalysis() {
+            const progressBar = document.getElementById('progressBar');
             const resultPlaceholder = document.getElementById('resultPlaceholder');
             const finalResult = document.getElementById('finalResult');
 
-            // Display "Calculating..." placeholder
+            // Reset UI elements
+            progressBar.style.width = '0%';
             resultPlaceholder.style.display = 'block';
             resultPlaceholder.innerText = 'Calculating...';
 
-            // Simulate a 2-second delay for the analysis
-            setTimeout(() => {
-                // Hide the calculating message and display the result
-                resultPlaceholder.style.display = 'none';
-                finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
-            }, 2000);
+            let progress = 0;
+            const analysisInterval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(analysisInterval);
+                    resultPlaceholder.style.display = 'none';
+                    finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
+                }
+            }, 500); // Simulate analysis progress every 0.5 seconds
         }
 
-        // Function to generate a random engagement score for demonstration purposes
         function generateRandomScore() {
-            return (Math.random() * 10).toFixed(2);  // Generates a score between 0 and 10
+            return (Math.random() * 10).toFixed(2); 
         }
 
-        // Basic file validation on screen 2 (to confirm a file was selected)
         document.getElementById('fileInput').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
-                const fileName = file.name;
-                console.log(`File selected: ${fileName}`);
+                console.log(`File selected: ${file.name}`);
             } else {
                 console.log('No file selected');
             }
         });
+
+        function renderChart() {
+            const ctx = document.getElementById('engagementChart').getContext('2d');
+            const data = {
+                labels: Array.from({length: 10}, (_, i) => `Chunk ${i + 1}`),
+                datasets: [
+                    {
+                        label: 'Engagement Score',
+                        data: Array.from({length: 10}, () => generateRandomScore()),
+                        fill: false,
+                        borderColor: 'blue',
+                        tension: 0.1
+                    }
+                ]
+            };
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            };
+            new Chart(ctx, config);
+        }
+
+        document.getElementById('screen4').querySelector('button[onclick="showScreen(5)"]').addEventListener('click', renderChart);
     </script>
 </body>
 </html>
