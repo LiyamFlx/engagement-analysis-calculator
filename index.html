@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engagement Analysis Calculator</title>
+    <title>InsightWave Engagement Analysis</title>
     <style>
-        /* CSS Styles */
+        /* Reset and base styles */
         body, h2, p, button {
             margin: 0;
             padding: 0;
@@ -17,15 +17,16 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f9;
+            background-color: #121212;
+            color: #f0f0f0;
         }
 
         #app {
             width: 350px;
             padding: 20px;
-            background: #ffffff;
+            background: #1e1e1e;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -38,174 +39,181 @@
         }
 
         h2 {
-            font-size: 1.6em;
-            margin-bottom: 10px;
+            font-size: 1.8em;
+            margin-bottom: 15px;
         }
 
-        .note {
-            color: #888;
-            font-size: 0.9em;
-            margin-top: 10px;
+        p {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin: 10px auto;
+            background: #2b2b2b;
+            color: #ffffff;
+            padding: 10px;
+            border: 1px solid #3c3c3c;
+            border-radius: 5px;
+            display: block;
+            width: 100%;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
         }
 
         button {
             padding: 10px 20px;
-            margin: 15px 5px;
             border: none;
+            background-color: #3a3a3a;
+            color: #fff;
             border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #555;
         }
 
-        .progress-bar {
+        #resultPlaceholder, #finalResult {
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #0cd98b;
+        }
+
+        /* Dark mode and eye-friendly design */
+        .dark-mode {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+
+        /* Graph styling */
+        #chartContainer {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #chart {
+            height: 150px;
             width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        .progress {
-            height: 10px;
-            width: 0%;
-            background-color: #4CAF50;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Start Screen -->
-        <div class="screen active" id="startScreen">
-            <h2>Welcome to the Engagement Analysis</h2>
+        <!-- Screen 1: Start Screen -->
+        <div class="screen active" id="screen1">
+            <h2>Welcome to InsightWave</h2>
             <p>Analyze your audience engagement with precision.</p>
-            <button onclick="showScreen('uploadScreen')">Start Analysis</button>
+            <button onclick="showScreen(2)">Start Analysis</button>
         </div>
 
-        <!-- Upload File Screen -->
-        <div class="screen" id="uploadScreen">
-            <h2>Upload Your Audio File</h2>
-            <input type="file" id="fileInput" accept=".mp3,.wav">
-            <p class="note">Supported formats: MP3, WAV</p>
-            <button onclick="showScreen('startScreen')">Back</button>
-            <button onclick="processFile()">Calculate Engagement</button>
-        </div>
-
-        <!-- Real-Time Analysis Screen -->
-        <div class="screen" id="analysisScreen">
-            <h2>Analyzing Engagement</h2>
-            <div id="progressContainer">
-                <p>Progress: <span id="progressText">0%</span></p>
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar"></div>
-                </div>
+        <!-- Screen 2: File Upload Screen -->
+        <div class="screen" id="screen2">
+            <h2>Upload File</h2>
+            <input type="file" id="fileInput" accept=".mp3,.mp4,.wav">
+            <div class="buttons">
+                <button onclick="showScreen(1)">Back</button>
+                <button onclick="showScreen(3)">Next</button>
             </div>
-            <canvas id="engagementChart" width="400" height="200"></canvas>
-            <button onclick="showScreen('uploadScreen')">Back</button>
         </div>
 
-        <!-- Results Screen -->
-        <div class="screen" id="resultsScreen">
+        <!-- Screen 3: Calculate Engagement Screen -->
+        <div class="screen" id="screen3">
+            <h2>Calculate Engagement</h2>
+            <button onclick="startAnalysis()">Start Analysis</button>
+            <p id="resultPlaceholder" style="display: none;">Calculating...</p>
+            <div id="chartContainer">
+                <canvas id="chart"></canvas>
+            </div>
+            <div class="buttons">
+                <button onclick="showScreen(2)">Back</button>
+                <button onclick="showScreen(4)">Next</button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Secure Results Screen -->
+        <div class="screen" id="screen4">
             <h2>Analysis Results</h2>
-            <p>Your average engagement score:</p>
-            <h3 id="averageScore">0.00</h3>
-            <button onclick="showScreen('startScreen')">New Analysis</button>
+            <p id="finalResult">Engagement Score: -</p>
+            <a href="#" id="downloadLink" download="engagement_report.csv" style="display: none;">Download Full Report</a>
+            <div class="buttons">
+                <button onclick="showScreen(3)">Back</button>
+                <button onclick="showScreen(1)">New Analysis</button>
+            </div>
         </div>
     </div>
 
-    <!-- Include Chart.js for the graph -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // JavaScript to handle screen transitions and engagement analysis
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
+        // Function to show a specific screen by ID
+        function showScreen(screenNumber) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(`screen${screenNumber}`).classList.add('active');
         }
 
-        // Placeholder for file processing
-        function processFile() {
-            const file = document.getElementById("fileInput").files[0];
-            if (!file) {
-                alert("Please select a file to analyze.");
-                return;
-            }
-            showScreen("analysisScreen");
-            startAnalysis();
-        }
-
-        // Dummy data for engagement calculation
+        // Placeholder for engagement analysis
         function startAnalysis() {
-            const progressBar = document.getElementById("progressBar");
-            const progressText = document.getElementById("progressText");
-            const scores = [];
-            const maxScore = 10;
+            const resultPlaceholder = document.getElementById('resultPlaceholder');
+            const finalResult = document.getElementById('finalResult');
+            const chartContainer = document.getElementById('chartContainer');
+            
+            resultPlaceholder.style.display = 'block';
+            resultPlaceholder.innerText = 'Calculating...';
 
-            let progress = 0;
-
-            // Simulating real-time analysis
-            const interval = setInterval(() => {
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    showResults(scores);
-                    return;
-                }
-
-                // Simulate engagement score calculation
-                const score = (Math.random() * maxScore).toFixed(2);
-                scores.push(parseFloat(score));
-
-                progress += 10; // Update progress
-                progressBar.style.width = progress + "%";
-                progressText.textContent = progress + "%";
-
-                updateChart(scores); // Update chart with new score
-
-            }, 500); // Simulate every half-second
+            // Simulate a 2-second delay for analysis
+            setTimeout(() => {
+                resultPlaceholder.style.display = 'none';
+                finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
+                chartContainer.style.display = 'block';
+                showGraph();
+            }, 2000);
         }
 
-        // Function to update the engagement chart
-        function updateChart(scores) {
-            const ctx = document.getElementById("engagementChart").getContext("2d");
+        // Generate a random engagement score
+        function generateRandomScore() {
+            return (Math.random() * 10).toFixed(2);
+        }
 
-            if (window.engagementChart) {
-                window.engagementChart.data.labels.push(scores.length);
-                window.engagementChart.data.datasets[0].data.push(scores[scores.length - 1]);
-                window.engagementChart.update();
-            } else {
-                window.engagementChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: Array.from({ length: scores.length }, (_, i) => i + 1),
-                        datasets: [{
-                            label: 'Engagement Score',
-                            data: scores,
-                            borderColor: '#4CAF50',
-                            fill: false
-                        }]
+        // Show graph with random data
+        function showGraph() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            const labels = Array.from({ length: 10 }, (_, i) => `Chunk ${i + 1}`);
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Engagement Score',
+                    data: labels.map(() => generateRandomScore()),
+                    borderColor: '#0cd98b',
+                    backgroundColor: 'rgba(12, 217, 139, 0.2)',
+                    fill: true,
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    scales: {
+                        y: { min: 0, max: 10 },
+                        x: { beginAtZero: true }
                     },
-                    options: {
-                        scales: {
-                            x: { display: true, title: { display: true, text: 'Time' } },
-                            y: { display: true, title: { display: true, text: 'Score' }, min: 0, max: 10 }
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Engagement: ${context.parsed.y}`;
+                                }
+                            }
                         }
                     }
-                });
-            }
-        }
-
-        // Show final results
-        function showResults(scores) {
-            const averageScore = (scores.reduce((a, b) => a + b) / scores.length).toFixed(2);
-            document.getElementById("averageScore").textContent = averageScore;
-            showScreen("resultsScreen");
+                }
+            });
         }
     </script>
 </body>
