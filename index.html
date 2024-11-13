@@ -3,218 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InsightWave Engagement Analysis</title>
-    <style>
-        /* Reset and base styles */
-        body, h2, p, button {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #121212;
-            color: #f0f0f0;
-        }
-
-        #app {
-            width: 350px;
-            padding: 20px;
-            background: #1e1e1e;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        h2 {
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
-
-        p {
-            margin-bottom: 20px;
-        }
-
-        input[type="file"] {
-            margin: 10px auto;
-            background: #2b2b2b;
-            color: #ffffff;
-            padding: 10px;
-            border: 1px solid #3c3c3c;
-            border-radius: 5px;
-            display: block;
-            width: 100%;
-        }
-
-        .buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #3a3a3a;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #555;
-        }
-
-        #resultPlaceholder, #finalResult {
-            margin: 20px 0;
-            font-size: 1.2em;
-            color: #0cd98b;
-        }
-
-        /* Dark mode and eye-friendly design */
-        .dark-mode {
-            background-color: #121212;
-            color: #f0f0f0;
-        }
-
-        /* Graph styling */
-        #chartContainer {
-            margin-top: 20px;
-            display: none;
-        }
-
-        #chart {
-            height: 150px;
-            width: 100%;
-        }
-    </style>
+    <title>InsightWave - Engagement Analysis Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="app">
         <!-- Screen 1: Start Screen -->
         <div class="screen active" id="screen1">
             <h2>Welcome to InsightWave</h2>
-            <p>Analyze your audience engagement with precision.</p>
+            <p>Analyze engagement with real-time insights and detailed breakdowns.</p>
             <button onclick="showScreen(2)">Start Analysis</button>
         </div>
 
         <!-- Screen 2: File Upload Screen -->
         <div class="screen" id="screen2">
-            <h2>Upload File</h2>
-            <input type="file" id="fileInput" accept=".mp3,.mp4,.wav">
-            <div class="buttons">
-                <button onclick="showScreen(1)">Back</button>
-                <button onclick="showScreen(3)">Next</button>
-            </div>
+            <h2>Upload Audio File</h2>
+            <input type="file" id="fileInput" accept=".mp3,.wav">
+            <p class="note">Supported formats: MP3, WAV</p>
+            <button onclick="showScreen(3)">Next</button>
         </div>
 
-        <!-- Screen 3: Calculate Engagement Screen -->
+        <!-- Screen 3: Real-Time Analysis -->
         <div class="screen" id="screen3">
-            <h2>Calculate Engagement</h2>
-            <button onclick="startAnalysis()">Start Analysis</button>
-            <p id="resultPlaceholder" style="display: none;">Calculating...</p>
-            <div id="chartContainer">
-                <canvas id="chart"></canvas>
+            <h2>Real-Time Analysis</h2>
+            <p id="analyzingStatus">Analyzing...</p>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
-            <div class="buttons">
-                <button onclick="showScreen(2)">Back</button>
-                <button onclick="showScreen(4)">Next</button>
-            </div>
+            <canvas id="realTimeChart"></canvas>
+            <button onclick="showScreen(4)">See Results</button>
         </div>
 
-        <!-- Screen 4: Secure Results Screen -->
+        <!-- Screen 4: Results Screen -->
         <div class="screen" id="screen4">
             <h2>Analysis Results</h2>
-            <p id="finalResult">Engagement Score: -</p>
-            <a href="#" id="downloadLink" download="engagement_report.csv" style="display: none;">Download Full Report</a>
-            <div class="buttons">
-                <button onclick="showScreen(3)">Back</button>
-                <button onclick="showScreen(1)">New Analysis</button>
+            <div id="keyInsights">
+                <h3>Key Insights:</h3>
+                <p>Overall Engagement: 8.3/10</p>
+                <p>Peak Moments: 0:30, 2:15, 5:00</p>
+                <p>Recommended Improvements: Vary pitch more frequently, increase pace in section 2</p>
             </div>
+            <button onclick="generateReport()">Download Report</button>
+            <a id="downloadLink" download="engagement_report.csv" style="display: none;">Download Full Report</a>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Function to show a specific screen by ID
+        // Navigation function
         function showScreen(screenNumber) {
             document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
             document.getElementById(`screen${screenNumber}`).classList.add('active');
         }
 
-        // Placeholder for engagement analysis
-        function startAnalysis() {
-            const resultPlaceholder = document.getElementById('resultPlaceholder');
-            const finalResult = document.getElementById('finalResult');
-            const chartContainer = document.getElementById('chartContainer');
-            
-            resultPlaceholder.style.display = 'block';
-            resultPlaceholder.innerText = 'Calculating...';
+        // Mock analysis and dynamic chart updates
+        function startRealTimeAnalysis() {
+            const progressBar = document.getElementById('progressBar');
+            const ctx = document.getElementById('realTimeChart').getContext('2d');
+            let progress = 0;
 
-            // Simulate a 2-second delay for analysis
-            setTimeout(() => {
-                resultPlaceholder.style.display = 'none';
-                finalResult.innerText = `Engagement Score: ${generateRandomScore()}`;
-                chartContainer.style.display = 'block';
-                showGraph();
-            }, 2000);
-        }
-
-        // Generate a random engagement score
-        function generateRandomScore() {
-            return (Math.random() * 10).toFixed(2);
-        }
-
-        // Show graph with random data
-        function showGraph() {
-            const ctx = document.getElementById('chart').getContext('2d');
-            const labels = Array.from({ length: 10 }, (_, i) => `Chunk ${i + 1}`);
-            const data = {
-                labels: labels,
-                datasets: [{
-                    label: 'Engagement Score',
-                    data: labels.map(() => generateRandomScore()),
-                    borderColor: '#0cd98b',
-                    backgroundColor: 'rgba(12, 217, 139, 0.2)',
-                    fill: true,
-                }]
-            };
-
-            new Chart(ctx, {
+            const chart = new Chart(ctx, {
                 type: 'line',
-                data: data,
-                options: {
-                    scales: {
-                        y: { min: 0, max: 10 },
-                        x: { beginAtZero: true }
-                    },
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Engagement: ${context.parsed.y}`;
-                                }
-                            }
-                        }
-                    }
-                }
+                data: { labels: [], datasets: [{ label: 'Engagement Score', data: [] }] },
             });
+
+            const interval = setInterval(() => {
+                if (progress >= 100) clearInterval(interval);
+                else {
+                    progress++;
+                    progressBar.style.width = `${progress}%`;
+                    chart.data.labels.push(`Chunk ${progress}`);
+                    chart.data.datasets[0].data.push(Math.random() * 10);
+                    chart.update();
+                }
+            }, 100);
         }
+
+        function generateReport() {
+            const data = [["Time", "Engagement Score"]];
+            for (let i = 0; i < 10; i++) data.push([`00:${i * 10}`, (Math.random() * 10).toFixed(2)]);
+            const csv = data.map(row => row.join(",")).join("\n");
+            const blob = new Blob([csv], { type: 'text/csv' });
+            document.getElementById('downloadLink').href = URL.createObjectURL(blob);
+            document.getElementById('downloadLink').style.display = 'inline';
+        }
+
+        startRealTimeAnalysis();
     </script>
 </body>
 </html>
