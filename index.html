@@ -1,94 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InsightWave - Engagement Analysis Calculator</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InsightWave - Engagement Analysis</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Main Container */
+    .container {
+      width: 90%;
+      max-width: 600px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      margin-top: 20px;
+      transition: transform 0.5s ease;
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #a682ff;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+
+    /* Start Button */
+    .start-button, .button {
+      background-color: #a682ff;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .start-button:hover, .button:hover {
+      background-color: #7f5fbb;
+      transform: scale(1.05);
+    }
+
+    /* Waveform Animation */
+    .waveform {
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(90deg, rgba(166, 130, 255, 0.5), transparent);
+      animation: pulse 2s infinite;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+
+    /* Upload File Styling */
+    .file-upload-container {
+      border: 2px dashed #a682ff;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      color: #a682ff;
+      margin-bottom: 20px;
+    }
+
+    .file-upload-container.dragging {
+      border: 2px solid #7f5fbb;
+    }
+
+    .info-icon {
+      font-size: 1.2em;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .tooltip {
+      display: none;
+      position: absolute;
+      background-color: #333;
+      color: #fff;
+      padding: 8px;
+      font-size: 0.9em;
+      border-radius: 5px;
+      text-align: left;
+      top: -40px;
+      right: 10px;
+      white-space: nowrap;
+    }
+
+    .info-icon:hover + .tooltip {
+      display: block;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 15px;
+      background-color: #333;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #a682ff;
+      width: 0;
+    }
+
+    /* Graph Container */
+    .graph-container {
+      width: 100%;
+      height: 200px;
+      background-color: #2c2c2c;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #a682ff;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h1 { font-size: 1.8em; }
+      .start-button, .button { width: 100%; padding: 20px; font-size: 1.3em; }
+    }
+  </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Screen 1: Start Screen -->
-        <div class="screen active" id="screen1">
-            <h2>Welcome to InsightWave</h2>
-            <p>Analyze engagement with real-time insights and detailed breakdowns.</p>
-            <button onclick="showScreen(2)">Start Analysis</button>
-        </div>
 
-        <!-- Screen 2: File Upload Screen -->
-        <div class="screen" id="screen2">
-            <h2>Upload Audio File</h2>
-            <input type="file" id="fileInput" accept=".mp3,.wav">
-            <p class="note">Supported formats: MP3, WAV</p>
-            <button onclick="showScreen(3)">Next</button>
-        </div>
+  <!-- Start Screen -->
+  <div class="container active" id="start-screen">
+    <h1>Welcome to InsightWave</h1>
+    <p>Analyze your audio to uncover insights into engagement and sentiment</p>
+    <button class="start-button" onclick="showScreen('upload-file-screen')">
+      Start Analysis
+      <span class="info-icon">ℹ️</span>
+      <div class="tooltip">Get feedback on engagement, sentiment, and audience response to your audio.</div>
+    </button>
+    <div class="waveform"></div>
+  </div>
 
-        <!-- Screen 3: Real-Time Analysis -->
-        <div class="screen" id="screen3">
-            <h2>Real-Time Analysis</h2>
-            <p id="analyzingStatus">Analyzing...</p>
-            <div class="progress">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <canvas id="realTimeChart"></canvas>
-            <button onclick="showScreen(4)">See Results</button>
-        </div>
-
-        <!-- Screen 4: Results Screen -->
-        <div class="screen" id="screen4">
-            <h2>Analysis Results</h2>
-            <div id="keyInsights">
-                <h3>Key Insights:</h3>
-                <p>Overall Engagement: 8.3/10</p>
-                <p>Peak Moments: 0:30, 2:15, 5:00</p>
-                <p>Recommended Improvements: Vary pitch more frequently, increase pace in section 2</p>
-            </div>
-            <button onclick="generateReport()">Download Report</button>
-            <a id="downloadLink" download="engagement_report.csv" style="display: none;">Download Full Report</a>
-        </div>
+  <!-- Upload File Screen -->
+  <div class="container" id="upload-file-screen">
+    <h1>Upload Audio File</h1>
+    <div class="file-upload-container" ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+      <input type="file" id="file-upload" accept=".mp3,.mp4,.wav" onchange="enableNextButton()">
+      <label for="file-upload">Drag and drop your audio file here or click to browse</label>
     </div>
+    <button class="button" id="next-btn" onclick="showScreen('analysis-screen')" disabled>Next</button>
+  </div>
 
-    <script>
-        // Navigation function
-        function showScreen(screenNumber) {
-            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-            document.getElementById(`screen${screenNumber}`).classList.add('active');
+  <!-- Real-Time Analysis Screen -->
+  <div class="container" id="analysis-screen">
+    <h1>Real-Time Analysis</h1>
+    <p>Analyzing engagement and sentiment in real-time...</p>
+    <div class="progress-bar">
+      <div class="progress" id="analysis-progress"></div>
+    </div>
+    <div class="graph-container">
+      <p>Data visualization of engagement and sentiment</p>
+    </div>
+    <button class="button" onclick="showScreen('results-screen')">View Results</button>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="container" id="results-screen">
+    <h1>Analysis Results</h1>
+    <div class="graph-container">
+      <p>Engagement and Sentiment Graph</p>
+    </div>
+    <p><strong>Overall Engagement Score:</strong> 8.5/10</p>
+    <button class="button">Download Report</button>
+    <button class="button" onclick="showScreen('start-screen')">Analyze Another</button>
+  </div>
+
+  <script>
+    // Navigation between screens
+    function showScreen(screenId) {
+      document.querySelectorAll('.container').forEach(container => {
+        container.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // Enable "Next" button after file upload
+    function enableNextButton() {
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    // Simulate Analysis Progress
+    let progressInterval;
+    function simulateProgress() {
+      let progress = document.getElementById("analysis-progress");
+      let width = 0;
+      clearInterval(progressInterval);
+      progressInterval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(progressInterval);
+        } else {
+          width++;
+          progress.style.width = width + "%";
         }
+      }, 50);
+    }
 
-        // Mock analysis and dynamic chart updates
-        function startRealTimeAnalysis() {
-            const progressBar = document.getElementById('progressBar');
-            const ctx = document.getElementById('realTimeChart').getContext('2d');
-            let progress = 0;
+    // Start Progress on Analysis Screen Load
+    document.getElementById('analysis-screen').addEventListener('transitionstart', simulateProgress);
 
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Engagement Score', data: [] }] },
-            });
-
-            const interval = setInterval(() => {
-                if (progress >= 100) clearInterval(interval);
-                else {
-                    progress++;
-                    progressBar.style.width = `${progress}%`;
-                    chart.data.labels.push(`Chunk ${progress}`);
-                    chart.data.datasets[0].data.push(Math.random() * 10);
-                    chart.update();
-                }
-            }, 100);
-        }
-
-        function generateReport() {
-            const data = [["Time", "Engagement Score"]];
-            for (let i = 0; i < 10; i++) data.push([`00:${i * 10}`, (Math.random() * 10).toFixed(2)]);
-            const csv = data.map(row => row.join(",")).join("\n");
-            const blob = new Blob([csv], { type: 'text/csv' });
-            document.getElementById('downloadLink').href = URL.createObjectURL(blob);
-            document.getElementById('downloadLink').style.display = 'inline';
-        }
-
-        startRealTimeAnalysis();
-    </script>
+    // Drag and drop handler
+    function handleDrop(event) {
+      event.preventDefault();
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        document.getElementById('file-upload').files = files;
+        enableNextButton();
+      }
+    }
+  </script>
 </body>
 </html>
