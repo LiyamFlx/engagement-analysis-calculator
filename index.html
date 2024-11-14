@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InsightWave - Engagement Analysis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* General Reset */
     * {
@@ -144,7 +145,7 @@
     /* Graph Container */
     .graph-container {
       width: 100%;
-      height: 200px;
+      height: 300px;
       background-color: #2c2c2c;
       border-radius: 8px;
       margin-top: 20px;
@@ -152,6 +153,7 @@
       justify-content: center;
       align-items: center;
       color: #a682ff;
+      position: relative;
     }
 
     /* Responsive Design */
@@ -193,7 +195,7 @@
       <div class="progress" id="analysis-progress"></div>
     </div>
     <div class="graph-container">
-      <p>Data visualization of engagement and sentiment</p>
+      <canvas id="sentimentChart"></canvas>
     </div>
     <button class="button" onclick="showScreen('results-screen')">View Results</button>
   </div>
@@ -202,7 +204,7 @@
   <div class="container" id="results-screen">
     <h1>Analysis Results</h1>
     <div class="graph-container">
-      <p>Engagement and Sentiment Graph</p>
+      <canvas id="finalChart"></canvas>
     </div>
     <p><strong>Overall Engagement Score:</strong> 8.5/10</p>
     <button class="button">Download Report</button>
@@ -210,47 +212,54 @@
   </div>
 
   <script>
-    // Navigation between screens
     function showScreen(screenId) {
       document.querySelectorAll('.container').forEach(container => {
         container.classList.remove('active');
       });
       document.getElementById(screenId).classList.add('active');
+      if (screenId === 'analysis-screen') {
+        simulateProgress();
+        updateSentimentChart();
+      }
     }
 
-    // Enable "Next" button after file upload
     function enableNextButton() {
       document.getElementById('next-btn').disabled = false;
     }
 
-    // Simulate Analysis Progress
-    let progressInterval;
+    let analysisProgress = 0;
     function simulateProgress() {
-      let progress = document.getElementById("analysis-progress");
-      let width = 0;
-      clearInterval(progressInterval);
-      progressInterval = setInterval(() => {
-        if (width >= 100) {
-          clearInterval(progressInterval);
-        } else {
-          width++;
-          progress.style.width = width + "%";
-        }
+      analysisProgress = 0;
+      let progressBar = document.getElementById("analysis-progress");
+      let interval = setInterval(() => {
+        if (analysisProgress >= 100) clearInterval(interval);
+        else progressBar.style.width = `${++analysisProgress}%`;
       }, 50);
     }
 
-    // Start Progress on Analysis Screen Load
-    document.getElementById('analysis-screen').addEventListener('transitionstart', simulateProgress);
-
-    // Drag and drop handler
-    function handleDrop(event) {
-      event.preventDefault();
-      const files = event.dataTransfer.files;
-      if (files.length > 0) {
-        document.getElementById('file-upload').files = files;
-        enableNextButton();
-      }
-    }
-  </script>
-</body>
-</html>
+    // Sentiment Chart Initialization
+    let sentimentChart;
+    function updateSentimentChart() {
+      const ctx = document.getElementById('sentimentChart').getContext('2d');
+      if (sentimentChart) sentimentChart.destroy(); // Reset previous chart
+      sentimentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 50 }, (_, i) => `Sec ${i + 1}`),
+          datasets: [{
+            label: 'Engagement',
+            borderColor: '#a682ff',
+            data: Array.from({ length: 50 }, () => Math.random() * 10),
+            fill: false,
+          }, {
+            label: 'Sentiment',
+            borderColor: '#ff5757',
+            data: Array.from({ length: 50 }, () => Math.random() * 10),
+            fill: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true }
