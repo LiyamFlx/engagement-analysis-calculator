@@ -13,12 +13,25 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    :root {
+      --primary-color: #6C63FF;
+      --secondary-color: #FFFFFF;
+      --error-color: #FF6B6B;
+      --success-color: #28C76F;
+      --background-dark: #121212;
+      --background-light: #1E1E1E;
+      --text-light: #F0F0F0;
+      --text-highlight: #A682FF;
+      --padding: 16px;
+      --border-radius: 8px;
     }
 
     body {
-      background-color: #121212;
-      color: #f0f0f0;
+      background-color: var(--background-dark);
+      color: var(--text-light);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -31,73 +44,86 @@
     .container {
       width: 90%;
       max-width: 800px;
-      padding: 20px;
-      background-color: #1e1e1e;
-      border-radius: 10px;
+      padding: var(--padding);
+      background-color: var(--background-light);
+      border-radius: var(--border-radius);
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
       margin-top: 20px;
+      animation: fadeIn 0.5s ease-in-out;
     }
 
     h1 {
       font-size: 2.5em;
-      color: #fff;
+      color: var(--primary-color);
+      margin-bottom: var(--padding);
     }
 
     p {
-      color: #a682ff;
+      color: var(--text-highlight);
       font-size: 1.2em;
     }
 
     .button {
-      background-color: #a682ff;
-      color: white;
+      background-color: var(--primary-color);
+      color: var(--secondary-color);
       padding: 15px 30px;
       font-size: 1.3em;
       border: none;
-      border-radius: 5px;
+      border-radius: var(--border-radius);
       cursor: pointer;
       transition: 0.3s ease;
-      margin-top: 20px;
+      margin-top: var(--padding);
     }
 
     .button:hover {
-      background-color: #7f5fbb;
+      background-color: #5A55FF;
       transform: scale(1.05);
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .upload-box {
-      border: 2px dashed #a682ff;
-      border-radius: 8px;
-      padding: 20px;
-      margin-top: 20px;
+      border: 2px dashed var(--text-highlight);
+      border-radius: var(--border-radius);
+      padding: var(--padding);
+      margin-top: var(--padding);
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .upload-box:hover {
+      background-color: rgba(166, 130, 255, 0.1);
     }
 
     .graph-container {
       width: 100%;
       height: 300px;
       background-color: #333;
-      border-radius: 8px;
-      margin-top: 20px;
+      border-radius: var(--border-radius);
+      margin-top: var(--padding);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #a682ff;
+      color: var(--text-highlight);
     }
 
     .progress-bar {
       width: 100%;
       height: 15px;
       background-color: #333;
-      border-radius: 8px;
+      border-radius: var(--border-radius);
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: var(--padding);
     }
 
     .progress {
       height: 100%;
-      background-color: #a682ff;
+      background-color: var(--text-highlight);
       width: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @media (max-width: 768px) {
@@ -108,12 +134,14 @@
 </head>
 <body>
 
+  <!-- Start Screen -->
   <div class="container" id="start-screen">
     <h1>Welcome to InsightWave</h1>
     <p>Analyze your audio to uncover insights into engagement and sentiment</p>
     <button class="button" onclick="goToUploadScreen()">Start Analysis</button>
   </div>
 
+  <!-- Upload File Screen -->
   <div class="container" id="upload-file-screen" style="display:none;">
     <h1>Upload Audio File</h1>
     <div class="upload-box" onclick="document.getElementById('file-input').click()">
@@ -123,6 +151,7 @@
     <button class="button" id="next-btn" onclick="goToAnalysisScreen()" style="opacity: 0.5;" disabled>Next</button>
   </div>
 
+  <!-- Real-Time Analysis Screen -->
   <div class="container" id="analysis-screen" style="display:none;">
     <h1>Real-Time Analysis</h1>
     <p>Analyzing engagement and sentiment in real-time...</p>
@@ -133,6 +162,7 @@
     <button class="button" onclick="goToResultsScreen()">View Results</button>
   </div>
 
+  <!-- Results Screen -->
   <div class="container" id="results-screen" style="display:none;">
     <h1>Analysis Results</h1>
     <p><strong>Overall Engagement Score:</strong> <span id="engagement-score">8.5</span>/10</p>
@@ -142,7 +172,6 @@
   </div>
 
   <script>
-    // Navigation
     function goToUploadScreen() {
       document.getElementById('start-screen').style.display = 'none';
       document.getElementById('upload-file-screen').style.display = 'block';
@@ -166,7 +195,6 @@
       document.getElementById('next-btn').style.opacity = 0.5;
     }
 
-    // File Validation
     function validateFile() {
       const fileInput = document.getElementById('file-input');
       if (fileInput.files.length > 0) {
@@ -175,7 +203,6 @@
       }
     }
 
-    // Simulated Analysis
     async function startAnalysis() {
       const file = document.getElementById('file-input').files[0];
       const formData = new FormData();
@@ -188,14 +215,13 @@
       renderSentiment(data.sentiment);
     }
 
-    // Visualization
     function renderFFT(fftData) {
       const ctx = document.getElementById('fftCanvas').getContext('2d');
       new Chart(ctx, {
         type: 'line',
         data: {
           labels: Array.from({ length: fftData.length }, (_, i) => i),
-          datasets: [{ data: fftData, borderColor: '#a682ff', fill: false }]
+          datasets: [{ data: fftData, borderColor: '#6C63FF', fill: false }]
         },
         options: { responsive: true }
       });
@@ -214,7 +240,6 @@
         .style('fill', d => d.type === 'positive' ? '#4caf50' : '#f44336');
     }
 
-    // Report Download
     function downloadReport() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
