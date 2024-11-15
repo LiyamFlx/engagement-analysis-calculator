@@ -3,171 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InsightWave - Enhanced Engagement Analysis</title>
-  <style>
-    /* General Styles */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background-color: #121212; color: #f0f0f0; display: flex; justify-content: center; align-items: center; flex-direction: column; min-height: 100vh; text-align: center; }
-    .container { width: 90%; max-width: 900px; padding: 20px; background-color: #1e1e1e; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); margin-top: 20px; }
-    h1 { font-size: 2em; color: #a682ff; }
-    button { background-color: #a682ff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s ease; margin-top: 10px; }
-    button:hover { background-color: #7f5fbb; }
-    .progress-bar { width: 100%; height: 15px; background-color: #333; border-radius: 8px; margin: 20px 0; overflow: hidden; }
-    .progress { height: 100%; background-color: #a682ff; width: 0; animation: progressBar 3s linear infinite; }
-    @keyframes progressBar { 0% { width: 0; } 100% { width: 100%; } }
-    .graph-container { position: relative; width: 100%; height: 300px; background-color: #1e1e1e; border-radius: 8px; margin-top: 20px; padding: 20px; color: #a682ff; }
-    .tooltip { display: none; position: absolute; background-color: #333; color: #fff; padding: 8px; font-size: 0.9em; border-radius: 5px; }
-    .info:hover .tooltip { display: block; }
-  </style>
+  <title>InsightWave - Engagement Analysis</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      margin-top: 20px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #fff;
+    }
+
+    p {
+      color: #a682ff;
+      font-size: 1.2em;
+    }
+
+    .button {
+      background-color: #a682ff;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1.3em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      background-color: #7f5fbb;
+      transform: scale(1.05);
+    }
+
+    .upload-box {
+      border: 2px dashed #a682ff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .graph-container {
+      width: 100%;
+      height: 300px;
+      background-color: #333;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a682ff;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 15px;
+      background-color: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #a682ff;
+      width: 0;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.8em; }
+      .button { font-size: 1em; padding: 10px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Start Screen -->
   <div class="container" id="start-screen">
     <h1>Welcome to InsightWave</h1>
     <p>Analyze your audio to uncover insights into engagement and sentiment</p>
-    <button onclick="showScreen('upload-file-screen')">Start Analysis</button>
+    <button class="button" onclick="goToUploadScreen()">Start Analysis</button>
   </div>
 
-  <!-- Upload File Screen -->
   <div class="container" id="upload-file-screen" style="display:none;">
     <h1>Upload Audio File</h1>
-    <div class="progress-bar"><div class="progress" id="upload-progress"></div></div>
-    <button onclick="showScreen('analysis-screen')">Next</button>
+    <div class="upload-box" onclick="document.getElementById('file-input').click()">
+      Drag and drop or click to select your audio file
+      <input type="file" id="file-input" accept=".mp3,.mp4,.wav" style="display:none;" onchange="validateFile()">
+    </div>
+    <button class="button" id="next-btn" onclick="goToAnalysisScreen()" style="opacity: 0.5;" disabled>Next</button>
   </div>
 
-  <!-- Real-Time Analysis Screen -->
   <div class="container" id="analysis-screen" style="display:none;">
     <h1>Real-Time Analysis</h1>
     <p>Analyzing engagement and sentiment in real-time...</p>
-    <div class="progress-bar"><div class="progress" id="analysis-progress"></div></div>
-    <div class="graph-container">
-      <canvas id="sentimentChart"></canvas>
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
     </div>
-    <button onclick="showScreen('results-screen')">View Results</button>
+    <canvas id="fftCanvas" width="400" height="300"></canvas>
+    <button class="button" onclick="goToResultsScreen()">View Results</button>
   </div>
 
-  <!-- Results Screen -->
   <div class="container" id="results-screen" style="display:none;">
     <h1>Analysis Results</h1>
-    <div id="engagement-summary"></div>
-    <div class="graph-container">
-      <canvas id="resultsChart"></canvas>
-    </div>
-    <button onclick="downloadReport()">Download Report (PDF/CSV)</button>
+    <p><strong>Overall Engagement Score:</strong> <span id="engagement-score">8.5</span>/10</p>
+    <div id="sentiment-chart" class="graph-container"></div>
+    <button class="button" onclick="downloadReport()">Download Report (PDF)</button>
+    <button class="button" onclick="restart()">Analyze Another File</button>
   </div>
 
   <script>
-    // Show screens
-    function showScreen(screenId) {
-      document.querySelectorAll('.container').forEach(screen => screen.style.display = 'none');
-      document.getElementById(screenId).style.display = 'block';
+    // Navigation
+    function goToUploadScreen() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('upload-file-screen').style.display = 'block';
+    }
 
-      if (screenId === 'analysis-screen') {
-        startRealTimeAnalysis();
-      } else if (screenId === 'results-screen') {
-        displayEngagementSummary();
-        renderResultsChart();
+    function goToAnalysisScreen() {
+      document.getElementById('upload-file-screen').style.display = 'none';
+      document.getElementById('analysis-screen').style.display = 'block';
+      startAnalysis();
+    }
+
+    function goToResultsScreen() {
+      document.getElementById('analysis-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'block';
+    }
+
+    function restart() {
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'block';
+      document.getElementById('next-btn').disabled = true;
+      document.getElementById('next-btn').style.opacity = 0.5;
+    }
+
+    // File Validation
+    function validateFile() {
+      const fileInput = document.getElementById('file-input');
+      if (fileInput.files.length > 0) {
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').style.opacity = 1;
       }
     }
 
-    // Simulated Data for Engagement Parameters
-    const engagementData = {
-      physical: { score: 8, weight: 0.25 },
-      emotional: { score: 6, weight: 0.3 },
-      mental: { score: 7, weight: 0.2 },
-      spiritual: { score: 9, weight: 0.25 }
-    };
+    // Simulated Analysis
+    async function startAnalysis() {
+      const file = document.getElementById('file-input').files[0];
+      const formData = new FormData();
+      formData.append('audio', file);
 
-    // Simulated sentiment data for real-time visualization
-    const sentimentData = Array.from({ length: 50 }, () => Math.floor(Math.random() * 10));
+      const response = await fetch('/analyze', { method: 'POST', body: formData });
+      const data = await response.json();
 
-    // Calculate Engagement Scores
-    function calculateEngagementScores() {
-      let totalScore = 0;
-      let totalWeight = 0;
-      for (const param in engagementData) {
-        totalScore += engagementData[param].score * engagementData[param].weight;
-        totalWeight += engagementData[param].weight;
-      }
-      return (totalScore / totalWeight).toFixed(2);
+      renderFFT(data.fft);
+      renderSentiment(data.sentiment);
     }
 
-    // Display Engagement Summary
-    function displayEngagementSummary() {
-      const overallScore = calculateEngagementScores();
-      document.getElementById('engagement-summary').innerHTML = `
-        <p><strong>Overall Engagement Score:</strong> ${overallScore}/10</p>
-        <p><strong>Physical Engagement:</strong> ${engagementData.physical.score} / 10</p>
-        <p><strong>Emotional Engagement:</strong> ${engagementData.emotional.score} / 10</p>
-        <p><strong>Mental Engagement:</strong> ${engagementData.mental.score} / 10</p>
-        <p><strong>Spiritual Engagement:</strong> ${engagementData.spiritual.score} / 10</p>
-      `;
-    }
-
-    // Real-Time Analysis Simulation with Sentiment Visualization
-    let sentimentChart;
-    function startRealTimeAnalysis() {
-      const ctx = document.getElementById('sentimentChart').getContext('2d');
-      sentimentChart = new Chart(ctx, {
+    // Visualization
+    function renderFFT(fftData) {
+      const ctx = document.getElementById('fftCanvas').getContext('2d');
+      new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array.from({ length: sentimentData.length }, (_, i) => i + 1),
-          datasets: [{
-            label: 'Sentiment Score',
-            data: [],
-            borderColor: '#a682ff',
-            backgroundColor: 'rgba(166, 130, 255, 0.3)',
-            fill: true,
-            lineTension: 0.2,
-          }]
+          labels: Array.from({ length: fftData.length }, (_, i) => i),
+          datasets: [{ data: fftData, borderColor: '#a682ff', fill: false }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true, max: 10 } } }
-      });
-
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index < sentimentData.length) {
-          sentimentChart.data.datasets[0].data.push(sentimentData[index++]);
-          sentimentChart.update();
-        } else {
-          clearInterval(interval);
-        }
-      }, 500);
-    }
-
-    // Render Results Chart with Sentiment & Engagement Summary
-    function renderResultsChart() {
-      const ctx = document.getElementById('resultsChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Physical', 'Emotional', 'Mental', 'Spiritual'],
-          datasets: [{
-            label: 'Engagement Score',
-            data: Object.values(engagementData).map(param => param.score),
-            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
-          }]
-        },
-        options: { responsive: true, scales: { y: { beginAtZero: true, max: 10 } } }
+        options: { responsive: true }
       });
     }
 
-    // Download Report
+    function renderSentiment(sentimentData) {
+      const svg = d3.select('#sentiment-chart').append('svg').attr('width', 400).attr('height', 300);
+      svg.selectAll('rect')
+        .data(sentimentData)
+        .enter()
+        .append('rect')
+        .attr('x', (d, i) => i * 50)
+        .attr('y', d => 300 - d.value * 300)
+        .attr('width', 40)
+        .attr('height', d => d.value * 300)
+        .style('fill', d => d.type === 'positive' ? '#4caf50' : '#f44336');
+    }
+
+    // Report Download
     function downloadReport() {
-      const csvContent = [
-        ["Parameter", "Score", "Weight"],
-        ...Object.keys(engagementData).map(key => [key, engagementData[key].score, engagementData[key].weight]),
-        ["Sentiment Scores", sentimentData.join(",")]
-      ].map(e => e.join(",")).join("\n");
-
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = "engagement_sentiment_report.csv";
-      link.click();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text('Engagement Analysis Report', 10, 10);
+      doc.text('Overall Engagement Score: 8.5/10', 10, 20);
+      doc.save('Engagement_Report.pdf');
     }
   </script>
+
 </body>
 </html>
