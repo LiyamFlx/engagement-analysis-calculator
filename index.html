@@ -1,106 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InsightWave - Enhanced Engagement Analysis</title>
-    <style>
-        /* ... (existing CSS styles) */
-
-        /* Additional styles */
-        .upload-box {
-            border: 2px dashed var(--text-highlight);
-            border-radius: var(--border-radius);
-            padding: var(--padding);
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .progress-bar {
-            height: 20px;
-            background-color: #333;
-            border-radius: var(--border-radius);
-            margin-bottom: var(--padding);
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--text-highlight);
-            width: 0%;
-            transition: width 1s ease-in-out;
-        }
-
-        #sentiment-chart, #sentiment-chart-results {
-            width: 100%;
-            height: 300px;
-        }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
 </head>
 <body>
-    <div class="container" id="start-screen">
-        <h1>Welcome to InsightWave</h1>
-        <p>Analyze your audio to uncover insights into engagement and sentiment</p>
-        <button class="button" id="start-button">Start Analysis</button>
-    </div>
-
-    <div class="container" id="upload-screen" style="display: none;">
-        <h1>Upload Audio File</h1>
-        <input type="file" id="file-input" accept=".mp3,.mp4,.wav" style="display: none;">
-        <label for="file-input" class="upload-box">Drag and drop or click to select your audio file</label>
-        <button class="button" id="analyze-button" disabled>Analyze</button>
-    </div>
-
-    <div class="container" id="analysis-screen" style="display: none;">
-        <h1>Real-Time Analysis</h1>
-        <p>Analyzing engagement and sentiment in real-time...</p>
-        <div class="progress-bar">
-            <div class="progress" id="progress"></div>
-        </div>
-        <canvas id="fftCanvas"></canvas>
-        <div id="sentiment-chart"></div>
-    </div>
-
-    <div class="container" id="results-screen" style="display: none;">
-        <h1>Analysis Results</h1>
-        <p><strong>Overall Engagement Score:</strong> <span id="engagement-score"></span>/10</p>
-        <div id="sentiment-chart-results"></div>
-        <button class="button" id="download-button">Download Report (PDF)</button>
-        <button class="button" id="restart-button">Analyze Another File</button>
-    </div>
-
-    <script>
-        // ... (existing JavaScript code)
-
-        // Additional functionality
-        function validateFile() {
-            const fileInput = document.getElementById('file-input');
-            if (fileInput.files.length > 0) {
-                document.getElementById('analyze-button').disabled = false;
-            }
-        }
-
-        async function startAnalysis() {
-            // ... (existing analysis logic)
-
-            // Update progress bar
-            const progressInterval = setInterval(() => {
-                const progress = Math.floor(Math.random() * 100); // Replace with actual progress calculation
-                document.getElementById('progress').style.width = `${progress}%`;
-            }, 100);
-
-            // ... (rest of the analysis logic)
-
-            clearInterval(progressInterval);
-        }
-
-        function renderSentiment(sentimentData) {
-            // ... (existing D3.js code for real-time sentiment chart)
-
-            // For results screen:
-            const svg = d3.select('#sentiment-chart-results').append('svg').attr('width', 400).attr('height', 300);
-            // ... (D3.js code to create a bar chart or other visualization)
-        }
-
-        // Event listeners
-        // ... (event listeners for button clicks, file input changes, etc.)
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;InsightWave - Engagement Analysis&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;link rel="stylesheet" href="styles.css"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="container" id="start-screen"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Start Screen Content --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Welcome to InsightWave&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;p&gt;Analyze your audio to uncover insights into engagement and sentiment.&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button class="start-button" onclick="showScreen('upload-screen')"&gt;Start Analysis&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="container" id="upload-screen" style="display: none;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Upload File Screen Content --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Upload Audio File&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;input type="file" id="audio-file" accept=".mp3, .mp4, .wav"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="showScreen('analysis-screen')"&gt;Next&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="container" id="analysis-screen" style="display: none;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Real-Time Analysis Screen Content --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Real-Time Analysis&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="progress-bar"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;canvas id="engagementChart"&gt;&lt;/canvas&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="showScreen('results-screen')"&gt;View Results&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="container" id="results-screen" style="display: none;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Results Screen Content --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Analysis Results&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;p&gt;Average Engagement Score: &lt;span id="engagement-score"&gt;-&lt;/span&gt;&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="downloadReport()"&gt;Download Report&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="showScreen('start-screen')"&gt;Start New Analysis&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script src="script.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
