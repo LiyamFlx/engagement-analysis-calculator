@@ -1,0 +1,7 @@
+Library/
+.Trash/ # Add problematic directories to .gitignore
+node_modules
+
+# Local Netlify folder
+.netlify
+.Trash/
